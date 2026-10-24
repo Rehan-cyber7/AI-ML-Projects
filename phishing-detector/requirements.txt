@@ -1,0 +1,26 @@
+# Core web framework
+flask==3.0.3
+flask-cors==4.0.1
+gunicorn==22.0.0
+
+# ML / data
+scikit-learn==1.5.1
+pandas==2.2.2
+numpy==1.26.4
+joblib==1.4.2
+
+# URL & domain analysis
+tldextract==5.1.2
+python-whois==0.9.4
+requests==2.32.3
+
+# Screenshot / image analysis (optional layer - comment out if not using it)
+selenium==4.23.1
+Pillow==10.4.0
+ImageHash==4.3.1
+
+# Utilities
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.2

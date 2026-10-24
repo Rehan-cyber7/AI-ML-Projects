@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based Job Recommendation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <span class="badge-ai">AI Engine</span>
+                <h1>JobMatch <span>AI Studio</span></h1>
+            </div>
+            <div class="actions-area">
+                <button class="btn btn-secondary" onclick="openModal('candidateModal')">+ Add Candidate Profile</button>
+                <button class="btn btn-primary" onclick="openModal('jobModal')">+ Post New Job Requirement</button>
+            </div>
+        </header>
+
+        <!-- KPI Metrics Bar -->
+        <section class="analytics-bar">
+            <div class="kpi-card">
+                <span class="kpi-label">Active Job Postings</span>
+                <span class="kpi-value" id="kpiJobs">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Registered Candidate Profiles</span>
+                <span class="kpi-value" id="kpiCandidates">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Avg System Recommendation Match</span>
+                <span class="kpi-value highlight" id="kpiAvgScore">0%</span>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="view-tabs">
+            <button class="tab-btn active" onclick="switchView('candidateView')" id="tabCandidateView">Candidate Job Seeker Portal</button>
+            <button class="tab-btn" onclick="switchView('recruiterView')" id="tabRecruiterView">Recruiter & Agency Talent Portal</button>
+        </nav>
+
+        <!-- CANDIDATE PORTAL -->
+        <main id="candidateView" class="portal-view active">
+            <div class="portal-grid">
+                <!-- Sidebar Candidate Selection -->
+                <aside class="sidebar-card">
+                    <h3>Select Candidate Profile</h3>
+                    <select id="candidateSelect" onchange="loadCandidateRecommendations()">
+                        <option value="">-- Choose Candidate --</option>
+                    </select>
+                    <div id="candidateProfileCard" class="profile-summary">
+                        <p class="text-muted">Select a candidate to run AI matching algorithms and see recommended job roles.</p>
+                    </div>
+                </aside>
+
+                <!-- Recommendation Cards -->
+                <section class="main-content-card">
+                    <div class="content-header">
+                        <h3>AI Recommended Job Opportunities</h3>
+                        <span class="subtext">Ranked by Hybrid Composite Fit Score</span>
+                    </div>
+                    <div id="candidateRecsList" class="cards-list"></div>
+                </section>
+            </div>
+        </main>
+
+        <!-- RECRUITER PORTAL -->
+        <main id="recruiterView" class="portal-view">
+            <div class="portal-grid">
+                <!-- Sidebar Job Selection -->
+                <aside class="sidebar-card">
+                    <h3>Select Job Posting</h3>
+                    <select id="jobSelect" onchange="loadJobRecommendations()">
+                        <option value="">-- Choose Job Posting --</option>
+                    </select>
+                    <div id="jobProfileCard" class="profile-summary">
+                        <p class="text-muted">Select a job posting to discover top matched candidates and skill gap analysis.</p>
+                    </div>
+                </aside>
+
+                <!-- Candidate Matches -->
+                <section class="main-content-card">
+                    <div class="content-header">
+                        <h3>Top Recommended Applicants & Talent</h3>
+                        <span class="subtext">Bi-directional AI Matching & XAI Drivers</span>
+                    </div>
+                    <div id="recruiterRecsList" class="cards-list"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Add Candidate -->
+    <div id="candidateModal" class="modal-backdrop">
+        <div class="modal-box">
+            <h2>Add New Candidate Profile</h2>
+            <form id="createCandidateForm" onsubmit="submitCandidate(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="candName" required placeholder="e.g. Elena Rostova">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="candEmail" required placeholder="elena@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Current Role / Title</label>
+                    <input type="text" id="candTitle" required placeholder="e.g. AI Research Engineer">
+                </div>
+                <div class="form-group">
+                    <label>Skills (comma-separated)</label>
+                    <input type="text" id="candSkills" required placeholder="Python, Deep Learning, PyTorch, SQL">
+                </div>
+                <div class="form-group row-2">
+                    <div>
+                        <label>Years of Exp</label>
+                        <input type="number" id="candExp" step="0.5" min="0" required value="4.0">
+                    </div>
+                    <div>
+                        <label>Expected Salary ($)</label>
+                        <input type="number" id="candSalary" min="0" required value="120000">
+                    </div>
+                </div>
+                <div class="form-group row-2">
+                    <div>
+                        <label>Location</label>
+                        <input type="text" id="candLoc" required value="San Francisco, CA">
+                    </div>
+                    <div>
+                        <label>Pref Location</label>
+                        <input type="text" id="candPrefLoc" required value="Remote">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Resume Text</label>
+                    <textarea id="candResume" rows="3" required placeholder="Paste candidate resume summary or details..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('candidateModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Add Job -->
+    <div id="jobModal" class="modal-backdrop">
+        <div class="modal-box">
+            <h2>Post New Job Requirement</h2>
+            <form id="createJobForm" onsubmit="submitJob(event)">
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" id="jobTitle" required placeholder="e.g. Senior Machine Learning Engineer">
+                </div>
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="jobCompany" required placeholder="e.g. TechCorp Solutions">
+                </div>
+                <div class="form-group row-2">
+                    <div>
+                        <label>Category</label>
+                        <select id="jobCategory">
+                            <option value="Data Science / AI">Data Science / AI</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Data Engineering">Data Engineering</option>
+                            <option value="DevOps">DevOps</option>
+                            <option value="Cybersecurity">Cybersecurity</option>
+                            <option value="Product Management">Product Management</option>
+                            <option value="UI/UX">UI/UX</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Work Type</label>
+                        <select id="jobWorkType">
+                            <option value="Remote">Remote</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Onsite">Onsite</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Required Skills (comma-separated)</label>
+                    <input type="text" id="jobReqSkills" required placeholder="Python, SQL, PyTorch">
+                </div>
+                <div class="form-group">
+                    <label>Preferred Skills (comma-separated)</label>
+                    <input type="text" id="jobPrefSkills" placeholder="Docker, AWS, Kubernetes">
+                </div>
+                <div class="form-group row-2">
+                    <div>
+                        <label>Min Exp (Yrs)</label>
+                        <input type="number" id="jobMinExp" min="0" value="2">
+                    </div>
+                    <div>
+                        <label>Max Exp (Yrs)</label>
+                        <input type="number" id="jobMaxExp" min="0" value="6">
+                    </div>
+                </div>
+                <div class="form-group row-2">
+                    <div>
+                        <label>Min Salary ($)</label>
+                        <input type="number" id="jobMinSal" value="100000">
+                    </div>
+                    <div>
+                        <label>Max Salary ($)</label>
+                        <input type="number" id="jobMaxSal" value="150000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="jobLoc" required value="San Francisco, CA">
+                </div>
+                <div class="form-group">
+                    <label>Job Description</label>
+                    <textarea id="jobDesc" rows="3" required placeholder="Describe core duties and expectations..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('jobModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Publish Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
